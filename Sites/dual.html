@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    .bar {
+        fill: #87A96B;
+    }
+
+.bar:hover {
+    fill: #98777B;
+}
+
+.axis--x path {
+    display: none;
+}
+
+body { font: 12px Arial;}
+
+path { 
+  stroke: steelblue;
+	stroke-width: 2;
+	fill: none;
+}
+.grid .tick {
+    stroke: lightgrey;
+    stroke-opacity: 0.7;
+    shape-rendering: crispEdges;
+}
+.grid path {
+    stroke-width: 0;
+}
+.axis path,
+.axis line {
+	fill: none;
+	stroke: grey;
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+</style>
+
+<body>
+<!-- load the d3.js library -->
+<script src="http://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+
+// Set the dimensions of the canvas / graph
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+width = 600 - margin.left - margin.right,
+height = 350 - margin.top - margin.bottom;
+/*var zoom = d3.zoom()
+.scaleExtent([1, 40])
+.translateExtent([[-100, -100], [width + 90, height + 100]])
+.on("zoom", zoomed);*/
+var parseTime = d3.timeParse("%Y-%m-%d");
+var formatYear = d3.timeFormat("%Y");
+var zoom = d3.zoom()
+.scaleExtent([1, 100])
+.on('zoom', zoomFn,zoomfn2);
+
+function zoomFn() {
+    d3.select('body').select('svg').select('g')
+    .attr('transform', 'translate(' + d3.event.transform.x + ',' + d3.event.transform.y + ') scale(' + d3.event.transform.k + ')');
+}
+
+function zoomfn2() {
+    d3.select('body').select('svg2').select('g')
+    .attr('transform', 'translate(' + d3.event.transform.x + ',' + d3.event.transform.y + ') scale(' + d3.event.transform.k + ')');
+}
+function make_x_axis() {
+    return d3.axisBottom(x)
+    .ticks(5)
+}
+
+// function for the y grid lines
+function make_y_axis() {
+    return d3.axisLeft(y)
+    .ticks(5)
+}
+
+var svg = d3.select("body").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform",
+      "translate(" + margin.left + "," + margin.top + ")")
+      .call(zoom);
+//svg.call(zoom);
+            // Get the data
+                 d3.csv("stocktable.csv", function(error, data) {
+             if (error) throw error;
+             // format the data
+             data.forEach(function(d) {
+                          d.Date = parseTime(d.Date);
+                          d.Close = +d.Close;
+                          });
+            /* var GroupedData = d3.nest()
+             .key(function(d) { return formatYear(d.Date); })
+             .rollup(function(v) {return{
+                     count: v.length,
+                     total: d3.sum(v, function(d) { return d.Close; }),
+                     avg: d3.mean(v, function(d) { return d.Close; })};})
+             .entries(data);
+             console.log(data);
+             console.log(GroupedData);*/
+             // Scale the range of the data
+             var x = d3.scaleTime().range([0, width]);
+             var y = d3.scaleLinear().range([height, 0]);
+         
+             // define the line
+             var valueline = d3.line()
+             .x(function(d) { return x(d.Date); })
+             .y(function(d) { return y(d.Close); });
+
+             x.domain(d3.extent(data, function(d) { return d.Date; }));
+             y.domain([0, d3.max(data, function(d) { return d.Close; })]);
+            
+             
+
+
+             // Add the valueline path.
+             svg.append("path")
+             .data([data])
+             .attr("class", "line")
+             .attr("d", valueline);
+             
+             // Add the X Axis
+             svg.append("g")
+             .attr("transform", "translate(0," + height + ")")
+             .call(d3.axisBottom(x).ticks(10));
+             
+             // Add the Y Axis
+             svg.append("g")
+             .call(d3.axisLeft(y).ticks(5))
+             .append("text")
+             .attr("text-anchor","end")
+             .text("Close");
+             
+             svg.append("text")
+             .attr("class", "x label")
+             .attr("text-anchor", "end")
+             .attr("x", width)
+             .attr("y", height - 6)
+             .text("Date (year)");
+             
+             svg.append("text")
+             .attr("class", "y label")
+             .attr("text-anchor", "end")
+             .attr("y", 6)
+             .attr("dy", ".75em")
+             .attr("transform", "rotate(-90)")
+             .text("Close");
+             
+             // Draw the x Grid lines
+             svg.append("g")
+             .attr("class", "grid")
+             .attr("transform", "translate(0," + height + ")")
+             .call(make_x_axis()
+                   .tickSize(-height, 0, 0)
+                   .tickFormat("")
+                   )
+             
+             // Draw the y Grid lines
+             svg.append("g")
+             .attr("class", "grid")
+             .call(make_y_axis()
+                   .tickSize(-width, 0, 0)
+                   .tickFormat("")
+                   )
+       
+             });
+    
+// Adds the svg canvas
+var svg2 = d3.select("body").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform",
+      "translate(" + margin.left + "," + margin.top + ")")
+      .call(zoom);
+      console.log(svg2.width);
+
+//svg2.call(zoom);
+    //  x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+      //y = d3.scaleLinear().rangeRound([height, 0]);
+d3.csv("stocktable.csv", function(error, data) {
+       if (error) throw error;
+       
+       // format the data
+       data.forEach(function(d) {
+                    d.Date = parseTime(d.Date);
+                    d.Close = +d.Close;
+                    });
+              var GroupedData = d3.nest()
+              .key(function(d) { return formatYear(d.Date).toString(); }).sortKeys(d3.ascending)
+              .rollup(function(v) {return{
+              count: v.length,
+              total: d3.sum(v, function(d) { return d.Close; }),
+              avg: d3.mean(v, function(d) { return d.Close; })};})
+              .entries(data);
+              console.log(GroupedData[0]);
+       x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+       y = d3.scaleLinear().rangeRound([height, 0]);
+       x.domain(GroupedData.map(function(d) { return d.key; }));
+       y.domain([0, d3.max(GroupedData, function(d) { return d.value.avg; })]);
+       
+       svg2.append("g")
+       .attr("class", "axis axis--x")
+       .attr("transform", "translate(0," + height + ")")
+       .call(d3.axisBottom(x))
+       .selectAll("text")
+       .attr("y", 0)
+       .attr("x", 6)
+       .attr("dy", ".99em")
+       .style("text-anchor", "start");
+       
+
+       
+       svg2.append("g")
+       .attr("class", "axis axis--y")
+       .call(d3.axisLeft(y).ticks(4))
+       .append("text")
+       .attr("text-anchor", "end")
+       .text("Frequency");
+       svg2.selectAll(".bar")
+       .data(GroupedData)
+       .enter().append("rect")
+       .attr("class", "bar")
+       .attr("x", function(d,i){return x(d.key);})
+       .attr("y", function(d){return y(d.value.avg);})
+       .attr("width", x.bandwidth())
+       .attr("height", function(d,i) { return height - y(d.value.avg);});
+       // Draw the y Grid lines
+       svg2.append("g")
+       .attr("class", "grid")
+       .call(make_y_axis()
+             .tickSize(-width, 0, 0)
+             .tickFormat("")
+             )
+      
+       });</script>
+</body>

@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Page 1</title>
+<style>
+
+.bar {
+    fill: #87A96B;
+}
+
+.bar:hover {
+    fill: #98777B;
+}
+
+.axis--x path {
+  display: none;
+}
+
+    .d3-tip {
+        line-height: 1;
+        padding: 6px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 10px;
+        width: 100%;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.8);
+        content: "\25BC";
+        position: absolute;
+        text-align: center;
+    }
+    
+    /* Style northward tooltips specifically */
+    .d3-tip.n:after {
+        margin: -2px 0 0 0;
+        top: 100%;
+        left: 0;
+    }
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="d3-tip.js"></script>
+<body>
+<select id = "opts">
+    <option value="0" selected="selected">--Select data--</option>
+    <option value="rows0">Google</option>
+    <option value="rows1">Facebook</option>
+    <option value="rows2">Bing</option>
+    <option value="rows3">Yahoo</option>
+    <option value="rows4">Twitter</option>
+    <!-- and so on... -->
+</select>
+</body>
+<script>
+
+
+//load files
+var filesArray = ["Google_data.csv","Facebook_data.csv","Bing_data.csv","Yahoo_data.csv","twitter_data.csv"];
+var rows1, rows2, remaining = 5;
+var svg = d3.select("svg"),
+margin = {top: 40, right: 20, bottom: 150, left: 60},
+width = +svg.attr("width") - margin.left - margin.right,
+height = +svg.attr("height") - margin.top - margin.bottom;
+
+
+
+d3.csv(filesArray[0], function(csv) {
+       rows0 = csv;
+       if (!--remaining) doSomething();
+       });
+d3.csv(filesArray[1], function(csv) {
+      rows1 = csv;
+      if (!--remaining) doSomething();
+      });
+d3.csv(filesArray[2], function(csv) {
+     rows2 = csv;
+     if (!--remaining) doSomething();
+     });
+d3.csv(filesArray[3], function(csv) {
+    rows3 = csv;
+    if (!--remaining) doSomething();
+    });
+d3.csv(filesArray[4], function(csv) {
+   rows4 = csv;
+   if (!--remaining) doSomething();
+   });
+   
+   ///start the svg based on selection
+  function doSomething() {
+      d3.select('#opts')
+      .on('change', function() {
+          var newData = eval(d3.select(this).property('value'));
+          updateLegend(newData);
+          });
+          function updateLegend(newData) {
+              d3.selectAll("svg > *").remove();
+              var tool_tip = d3.tip()
+              .attr("class", "d3-tip")
+              .offset([-8, 0])
+              .html(function(d) {
+                    return "<strong>Page Title:</strong> <span style='color:white'>" + d.curr + "<br></span><strong>No. of hits:</strong> <span style='white'>" + d.n + "</span>"; });
+
+            var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+                y = d3.scaleLinear().rangeRound([height, 0]);
+              var g = svg.append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+             svg.call(tool_tip);
+              x.domain(newData.map(function(d) { return d.curr; }));
+              y.domain([0, d3.max(newData, function(d) { return +d.n; })]);
+              g.selectAll(".bar")
+              .data(newData)
+              .enter().append("rect")
+              .attr("class", "bar")
+              .attr("x", function(d,i){return x(d.curr);})
+              .attr("y", function(d){return y(+d.n);})
+              .attr("width", x.bandwidth())
+              .attr("height", function(d,i) { return height - y(+d.n);})
+              .on('mouseover', tool_tip.show)
+              .on('mouseout', tool_tip.hide);
+              // Draw the y Grid lines
+              g.append("g")
+              .attr("class", "grid")
+              g.append("g")
+              .attr("class", "axis axis--x")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x))
+              .selectAll("text")
+              .attr("y", 0)
+              .attr("x", 6)
+              .attr("dy", ".99em")
+              .attr("transform", "rotate(45)")
+              .style("text-anchor", "start");
+              g.append("g")
+              .attr("class", "axis axis--y")
+              .call(d3.axisLeft(y).ticks(10))
+              .append("text")
+              .attr("text-anchor", "end")
+              .text("Frequency");
+              
+              // remove old elements
+             
+              
+          }
+      
+
+
+  }
+
+</script>
+

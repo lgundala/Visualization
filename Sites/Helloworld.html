@@ -1,0 +1,157 @@
+
+
+<!DOCTYPE html>
+
+<meta charset="utf-8">
+
+<style>
+
+<!-- Cascading Style Sheets For this document -->
+
+body {
+
+font: 10px sans-serif;
+
+}
+
+
+
+.bar0 rect { fill: steelblue; shape-rendering: crispEdges;}
+
+.bar0 text {fill: #fff;}
+
+.bar1 rect { fill: red; shape-rendering: crispEdges;}
+
+.bar1 text {fill: #fff;}
+
+.bar2 rect { fill: green; shape-rendering: crispEdges;}
+
+.bar2 text {fill: #fff;}
+
+.bar3 rect { fill: blue; shape-rendering: crispEdges;}
+
+.bar3 text {fill: #fff;}
+
+
+
+</style>
+
+<head>
+
+<title>CS564 - D3 Hello World Web Page.</title>
+
+</head>
+
+<body>
+
+<!-- text to be displayed on the page -->
+
+
+
+<H2>D3 - Multicolor Hello World </H2>
+
+<p>
+
+Iterate over an array to produce a result.
+
+Use multiple class objects to change colors.
+
+</p>
+
+
+
+<!-- include the D3 javascript library-->
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+
+
+// D3 works in left to Right Chains-- nonintuitive
+
+// Use enter method to 'create placeholder elements for parts of your document
+
+
+
+<!-- The following is the javascript code that builds the histogram elements-->
+
+// Our core data
+
+var values = ["hello", "world","guten", "tag"];
+
+
+
+var margin = {top: 10, right: 30, bottom: 30, left: 30},
+
+width = 640 - margin.left - margin.right,
+
+height = 320 - margin.top - margin.bottom;
+
+
+
+// create our SVG canvas for DOM objects
+
+var svg = d3.select("body").append("svg")
+
+.attr("width", width + margin.left + margin.right)
+
+.attr("height", height + margin.top + margin.bottom)
+
+.append("g")
+
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+// now we will append a rectangle bar
+
+var bar = svg.selectAll(".bar")
+
+.data(values) // all following is applied multiple times- number of data entries.
+
+.enter().append("g")
+
+.attr("class", function(d,i) { return "bar"+i})
+
+.attr("transform", function(d,i) { return "translate(" + i*125 + "," + 0 + ")"; });
+
+
+
+bar.append("rect")
+
+.attr("x", 1)
+
+.attr("width", 100)
+
+.attr("height", 50);
+
+
+
+bar.append("text")
+
+.attr("dy", ".75em")
+
+.attr("y", 6)
+
+.attr("x", 50)
+
+.attr("text-anchor", "middle")
+
+.text(function(d) { return d;});
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
+
+</body>
+
+</html>
+
+

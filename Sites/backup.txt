@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Wikipedia Clickstream</title>
+<link rel="stylesheet" href="normalize.css">
+<style>
+.bar {
+fill: #87A96B;
+}
+
+.bar:hover {
+fill: #98777B;
+}
+
+.axis--x path {
+display: none;
+}
+#chart {
+margin-top:300px;
+margin-left:50px/* NEW */
+height: 360px;                                                  /* NEW */
+position: absolute;                                             /* NEW */
+width: 360px;
+float: left;/* NEW */
+
+}
+
+#legend {
+margin-left: 550px;
+
+}/* NEW */
+
+.tooltip {                                                        /* NEW */
+background: #eee;                                               /* NEW */
+box-shadow: 0 0 5px #999999;                                    /* NEW */
+color: #333;                                                    /* NEW */
+display: none;                                                  /* NEW */
+font-size: 12px;                                                /* NEW */
+left: 130px;                                                    /* NEW */
+padding: 10px;                                                  /* NEW */
+position: absolute;                                             /* NEW */
+text-align: center;                                             /* NEW */
+top: 50px;                                                      /* NEW */
+width: 500px;                                                    /* NEW */
+z-index: 100;                                                    /* NEW */
+}
+#graph{
+float:left;
+/* NEW */
+height: 500px;                                                  /* NEW */
+/* NEW */
+width: 1000px
+
+
+}/* NEW */
+.legend {
+font-size: 12px;
+
+z-index=10;
+}
+rect {
+stroke-width: 2;
+}
+body{
+font-size:15px;
+}
+</style>
+</head>
+<body>
+Select the dataset:
+<select id = "opts">
+<option>--select--</option>
+<option value="ds1">Google</option>
+<option value="ds2" >Facebook</option>
+<option value="ds3">Bing</option>
+<option value="ds4">Yahoo</option>
+<option value="ds5">Twitter</option>
+</select>
+<br>
+How would you want the ordering:
+<select id = "order">
+<option value='0'>None</option>
+<option value='1'>Decreasing Hit count</option>
+<option value='2'>Increasing Hit count</option>
+</select>
+<br>
+Select the range (Number of data rows selected should not be more than 100 w.r.t readability):
+<input type="text" id = "txt1" name="start">
+to:
+<input type="text" id = "txt2" name="end">
+<button onclick="handle()">Submit</button>
+<script language='JavaScript'>
+function handle() {
+var t=document.getElementById("txt2").value;
+var z =document.getElementById("txt1").value;
+
+if(Math.abs(t-z)>100){
+alert("please enter a range of 100");
+}
+else if(Math.abs(t)<=Math.abs(z)){
+alert("first value should be less than the second value");
+}
+else if(Math.abs(t)>Math.abs(z)){
+
+var data = document.getElementById("opts").value;
+var od = document.getElementById("order").value;
+loadData(data,od,z,t);
+}
+
+}
+</script>
+<div id ="graph"></div>
+<div id="chart"></div>
+<div id = "legend"></div>
+
+
+<script src="//d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+function loadData(selectedData,od,z,t){
+if (t==0){
+t = 100;
+}
+if (selectedData =='ds1'){
+selectedData = "Google.csv";
+}
+if (selectedData =='ds2'){
+selectedData = "Facebook.csv";
+}
+if (selectedData =='ds3'){
+selectedData = "Bing.csv";
+}
+if (selectedData =='ds4'){
+selectedData = "Yahoo.csv";
+}
+if (selectedData =='ds5'){
+selectedData = "Twitter.csv";
+}
+
+d3.select("svg").remove();
+d3.select("#chart_svg").remove();
+d3.select("#legend_svg").remove();
+
+// Set the dimensions of the canvas / graph
+var margin = {top: 20, right: 90, bottom: 200, left: 40},
+width = 1000 - margin.left - margin.right,
+height = 450 - margin.top - margin.bottom;
+var svg = d3.select("#graph").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform",
+"translate(" + margin.left + "," + margin.top + ")")
+
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+y = d3.scaleLinear().rangeRound([height, 0]);
+var i =0;
+
+
+// function that wraps around the d3 pattern (bind, add, update, remove)
+<!--        function updateLegend(newData) {-->
+
+
+<!--            var ds2 = "Facebook.csv";-->
+// format the data
+
+d3.csv(selectedData, function(error,data) {
+data.forEach(function(d) {
+if(i<t){
+
+d.curr = d.curr
+
+d.n = +d.n;
+d.i = +i;
+i = +i+1;
+}
+});
+
+<!--                   console.log(data[0]);-->
+var newData = data.map(function(d){
+if(d.i<t){
+return [d['curr'],d['n']];
+}
+
+});
+
+console.log(newData.length);
+
+<!--                   for (i=z;i<l;i++)-->
+<!--                   {-->
+<!--                   var r= newData.pop();-->
+<!--                   }-->
+
+<!--                   var r = data.splice(50,50);-->
+if(z>newData.length){
+z1 = newData.length-100;
+t1 = newData.length;
+newData = newData.slice(z1,t1);
+}
+else{
+newData = newData.slice(z,t);
+}
+
+if(od==2){
+newData = newData.sort(function(a,b){
+return a[1] - b[1];
+});
+}
+if(od==1){
+newData = newData.sort(function(a,b){
+
+return b[1] - a[1];
+});
+}
+
+
+
+
+var g = svg.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+x.domain(newData.map(function(d) { return d[0]; }));
+y.domain([0, d3.max(newData, function(d) { return d[1]; })]);
+var tooltip = d3.select('#graph')                               // NEW
+.append('div')                                                // NEW
+.attr('class', 'tooltip');                                    // NEW
+tooltip.append('div')                                           // NEW
+.attr('class', 'curr');                                      // NEW
+tooltip.append('div')                                           // NEW
+.attr('class', 'count');                                      // NEW
+tooltip.append('div')                                           // NEW
+.attr('class', 'percent');
+
+
+g.selectAll(".bar")
+.data(newData)
+.enter().append("rect")
+.attr("class", "bar")
+.attr("x", function(d,i){return x(d[0]);})
+.attr("y", function(d){return y(d[1]);})
+.attr("width", x.bandwidth())
+.attr("height", function(d,i) { return height - y(d[1]);})
+.on('mouseover', function(d) {                            // NEW
+var total = d3.sum(newData.map(function(d) {                // NEW
+return d[1];
+}));
+var percent = Math.round(1000 * d[1] / total) / 10; // NEW
+tooltip.select('.curr').html(d[0]);                // NEW
+tooltip.select('.count').html(d[1]);                // NEW
+tooltip.select('.percent').html(percent + '%');             // NEW
+tooltip.style('display', 'block');                          // NEW
+})
+.on('mouseout', function() {                              // NEW
+tooltip.style('display', 'none');                           // NEW
+});
+// Draw the y Grid lines
+g.append("g")
+.attr("class", "grid")
+g.append("g")
+.attr("class", "axis axis--x")
+.attr("transform", "translate(0," + height + ")")
+.call(d3.axisBottom(x))
+.selectAll("text")
+.attr("y", 0)
+.attr("x", 6)
+.attr("dy", ".99em")
+.attr("transform", "rotate(45)")
+.style("text-anchor", "start");
+
+
+g.append("g")
+.attr("class", "axis axis--y")
+.call(d3.axisLeft(y).ticks(10))
+.append("text")
+.attr("text-anchor", "end")
+.text("Frequency");
+// remove old elements
+g.exit().remove();
+});
+<!--}-->
+
+
+(function(d3) {
+'use strict';
+var marginleft = 75;
+var margintop=350;
+var width = 600;
+var height = 800;
+var radius = Math.min(width-marginleft, height-margintop) / 2;
+var donutWidth = 150;
+var legendRectSize = 18;
+var legendSpacing = 4;
+var color = d3.scaleOrdinal(d3.schemeCategory20b);
+
+
+var svg2 = d3.select('#chart')
+.append('svg')
+.attr("id","chart_svg")
+.attr('width', width)
+.attr('height', height)
+.append('g')
+.attr('transform', 'translate(' + (width / 2) +
+',' + (height / 2) + ')');
+
+
+var arc = d3.arc()
+.innerRadius(radius - donutWidth)
+.outerRadius(radius);
+
+
+var pie = d3.pie()
+.value(function(d) { return d[1]; })
+.sort(null);
+
+
+var tooltip = d3.select('#chart')                               // NEW
+.append('div')                                                // NEW
+.attr('class', 'tooltip');                                    // NEW
+tooltip.append('div')                                           // NEW
+.attr('class', 'curr');                                      // NEW
+tooltip.append('div')                                           // NEW
+.attr('class', 'count');                                      // NEW
+tooltip.append('div')                                           // NEW
+.attr('class', 'percent');
+var i =0;// NEW
+
+<!--             var ds2 = "Facebook.csv";-->
+d3.csv(selectedData, function(error,data) {
+data.forEach(function(d) {
+if(i<t){
+d.curr = d.curr
+d.n = +d.n;
+d.i = +i;
+i = +i+1;
+}
+});
+
+
+var dataset = data.map(function(d){
+if(d.i<t){
+return [d['curr'],d['n']];
+}
+
+});
+
+
+if(z>dataset.length){
+z = dataset.length-100;
+t = dataset.length;
+dataset = dataset.slice(z1,t1);
+}
+else{
+dataset = dataset.slice(z,t);
+}
+
+if(od==2){
+dataset = dataset.sort(function(a,b){
+return a[1] - b[1];
+});
+}
+if(od==1){
+dataset = dataset.sort(function(a,b){
+
+return b[1] - a[1];
+});
+}
+
+
+var path = svg2.selectAll('path')
+.data(pie(dataset))
+.enter()
+.append('path')
+.attr('d', arc)
+.attr('fill', function(d, i) {
+return color(i);
+});
+
+path.on('mouseover', function(d) {                            // NEW
+var total = d3.sum(dataset.map(function(d) {                // NEW
+
+return d[1];
+}));
+<!--                            console.log(d.data[1]);-->
+var percent = Math.round(1000 * d.data[1] / total) / 10; // NEW
+tooltip.select('.curr').html(d.data[0]);                // NEW
+tooltip.select('.count').html(d.data[1]);                // NEW
+tooltip.select('.percent').html(percent + '%');             // NEW
+tooltip.style('display', 'block');                          // NEW
+});                                                           // NEW
+path.on('mouseout', function() {                              // NEW
+tooltip.style('display', 'none');                           // NEW
+});                                                           // NEW
+
+var svg3 = d3.select('#legend')
+.append('svg')
+.attr("id","legend_svg")
+.attr('width', width)
+.attr('height', Math.abs(t-z)*22)
+.append('g')
+.attr('transform', 'translate(' + (width / 2) +
+',' + (Math.abs(t-z)*22 / 2) + ')');
+var legend = svg3.selectAll('.legend')
+.data(color.domain())
+.enter()
+.append('g')
+.attr('class', 'legend')
+.attr('transform', function(d, i) {
+var height = legendRectSize + legendSpacing;
+var offset =  height * color.domain().length / 2;
+var horz = -2 * legendRectSize;
+var vert = i * height - offset;
+return 'translate(' + horz + ',' + vert + ')';
+});
+legend.append('rect')
+.attr('width', legendRectSize)
+.attr('height', legendRectSize)
+.style('fill', color)
+.style('stroke', color);
+legend.append('text')
+.data(dataset)
+.attr('x', legendRectSize + legendSpacing)
+.attr('y', legendRectSize - legendSpacing)
+.text(function(d) {
+return d[0]; });
+});
+})(window.d3);
+}
+
+</script>
+
+
+</body>

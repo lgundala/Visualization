@@ -1,0 +1,11 @@
+var values = d3.text("words.txt",function(rawData){
+var data = d3.tsv.parseRows(rawData).sort();
+console.log(data);
+var words = data.map(function(value, index){
+return value[1];
+});
+console.log(words);
+var dataset = data.map(function(value,index){ return parseInt(value[2]);});
+console.log(dataset);
+});
+

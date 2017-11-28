@@ -1,0 +1,39 @@
+{
+"name": bacteria,
+"children": [
+{
+ "name": Proteobacteria,
+ "children": [
+ {
+  "name": Alphaprideobacteria,
+  "children": [
+    { "name": Alphaprideobacteria.Amarginale,"size": 12},
+    { "name": Alphaprideobacteria.Aphagocytophilum,"size": 13},
+    { "name": Alphaprideobacteria.Aovis,"size": 14},
+    { "name": Alphaprideobacteria.Aplatys,"size": 15},
+    { "name": Alphaprideobacteria.Abovisa,"size": 16},
+    { "name": Alphaprideobacteria.Acaudatum,"size": 17}
+    ]
+ },
+ { "name": betaproteobacteria},
+ { "name": Gammaproteobacteria},
+ { "name": Deltaproteobacteria},
+ { "name": Epsilonproteobacteria},
+ { "name": Zetaproteobacteria},
+]
+},
+{ "name": Acidobacteria},
+{ "name": Actinobacteria},
+{ "name": Aquificae},
+{ "name": Amatimonadetes},
+{ "name": Bacteriodetes},
+{ "name": Caldiserica},
+{ "name": Chlamidiae},
+{ "name": Chlorobi},
+{ "name": Choroflexi},
+{ "name": Chrysiogenetes},
+{ "name": Cyanobacteria},
+{ "name": Deferribacteres},
+{ "name": Spirochaetes},
+]
+}

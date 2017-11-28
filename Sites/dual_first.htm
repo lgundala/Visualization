@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+    <style>
+        .bar {
+            fill: #87A96B;
+        }
+    
+    .bar:hover {
+        fill: #98777B;
+    }
+    
+    .axis--x path {
+        display: none;
+    }
+    
+    body { font: 12px Arial;}
+    div{
+        font: 30px Tahoma;
+        text-align: center;
+    }
+    
+    
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+    .grid .tick {
+        stroke: lightgrey;
+        stroke-opacity: 0.7;
+        shape-rendering: crispEdges;
+    }
+    .grid path {
+        stroke-width: 0;
+    }
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+    
+        </style>
+   
+    <body>
+
+        <!-- load the d3.js library -->
+        <script src="http://d3js.org/d3.v4.min.js"></script>
+        
+        <script>
+            
+            
+            // Set the dimensions of the canvas / graph
+            var margin = {top: 20, right: 20, bottom: 30, left: 50},
+            width = 600 - margin.left - margin.right,
+            height = 350 - margin.top - margin.bottom;
+        var parseTime = d3.timeParse("%Y-%m-%d");
+        var formatYear = d3.timeFormat("%Y");
+        
+
+        function make_x_axis() {
+            return d3.axisBottom(x)
+            .ticks(5)
+        }
+        
+        // function for the y grid lines
+        function make_y_axis() {
+            return d3.axisLeft(y)
+            .ticks(5)
+        }
+        
+        var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+              //svg.call(zoom);
+              // Get the data
+              d3.csv("stocktable.csv", function(error, data) {
+                     if (error) throw error;
+                     // format the data
+                     data.forEach(function(d) {
+                                  d.Date = parseTime(d.Date);
+                                  d.Close = +d.Close;
+                                  });
+                     var GroupedData = d3.nest()
+                     .key(function(d) { return formatYear(d.Date).toString(); }).sortKeys(d3.ascending)
+                     .rollup(function(v) {return{
+                             count: v.length,
+                             total: d3.sum(v, function(d) { return d.Close; }),
+                             avg: d3.mean(v, function(d) { return d.Close; })};})
+                     .entries(data);
+
+                     // Scale the range of the data
+                     var x = d3.scaleTime().range([0, width]);
+                     var y = d3.scaleLinear().range([height, 0]);
+                     
+                     // define the line
+                     var valueline = d3.line()
+                     .x(function(d) { return x(d.Date); })
+                     .y(function(d) { return y(d.Close); });
+                     
+                     x.domain(d3.extent(data, function(d) { return d.Date; }));
+                     y.domain([0, d3.max(data, function(d) { return d.Close; })]);
+                     
+                     
+                     var brush = d3.brush().on("end", brushended),
+                     idleTimeout,
+                     idleDelay = 350,
+                     k = height / width,
+                x0 = [d3.min(data, function(d) { return d.Date}), d3.max(data, function(d) { return d.Date})],
+                     y0 = [0, d3.max(data, function(d) { return d.Close; })],
+                     z = d3.scaleOrdinal(d3.schemeCategory10);
+
+                     
+                    
+                     function brushended() {
+                     var s = d3.event.selection;
+                    // console.log(s);
+                     if (!s) {
+                     if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
+                     x.domain(x0);
+                     y.domain(y0);
+                     } else {
+                     x.domain([s[0][0], s[1][0]].map(x.invert, x));
+                     y.domain([s[1][1], s[0][1]].map(y.invert, y));
+                     
+                     svg.select(".brush").call(brush.move, null);
+                     }
+                     zoom();                     }
+                     function idled() {
+                    // console.log(idleTimeout);
+                     idleTimeout = null;
+                     }
+                     
+                     function zoom() {
+                     var t = d3.event.transform;
+                     console.log(t);
+                     svg.select(".axis--x").transition(t).call(d3.axisBottom(x).ticks(10));
+                     svg.select(".axis--y").transition(t).call(d3.axisLeft(y).ticks(5));
+                     svg.selectAll("path").data([data]).transition(t)
+                     .attr("class", "line")
+                     .attr("d", valueline);
+                    }
+                     
+                     // Add the valueline path.
+                     svg.append("path")
+                     .data([data])
+                     .attr("class", "line")
+                     .attr("d", valueline);
+                     
+                     svg.append("g")
+                     .attr("class", "axis axis--x")
+                     .attr("transform", "translate(0," + height + ")")
+                     .call(d3.axisBottom(x))
+                     .selectAll("text")
+                     .attr("y", 0)
+                     .attr("x", 6)
+                     .attr("dy", ".99em")
+                     .style("text-anchor", "start");
+                     
+                     
+                     // Add the Y Axis
+                     svg.append("g")
+                     .attr("class", "axis axis--y")
+                     .call(d3.axisLeft(y).ticks(5))
+                     .append("text")
+                     .attr("text-anchor", "end")
+                     .text("Close");
+                     
+                     svg.append("text")
+                     .attr("class", "x label")
+                     .attr("text-anchor", "end")
+                     .attr("x", width)
+                     .attr("y", 325)
+                     .text("Year");
+                     
+                     svg.append("text")
+                     .attr("class", "y label")
+                     .attr("text-anchor", "end")
+                     .attr("y", 5)
+                     .attr("dy", ".75em")
+                     .attr("transform", "rotate(-90)")
+                     .text("Close");
+
+                     
+                     
+                     // Draw the y Grid lines
+                     svg.append("g")
+                     .attr("class", "grid")
+                     .call(make_y_axis()
+                           .tickSize(-width, 0, 0)
+                           .tickFormat("")
+                           )
+                     
+                     svg.append("text")
+                     .attr("x", (width / 2))
+                     .attr("y", 0 - (margin.top-40 / 2))
+                     .attr("text-anchor", "middle")
+                     .style("font-size", "16px")
+                     .style("text-decoration", "underline")
+                     .text("Year vs Close Graph");
+                     
+                     svg.append("g")
+                     .attr("class", "brush")
+                     .call(brush);
+                     
+                     });
+                     
+                     // Adds the svg canvas
+                     var svg2 = d3.select("body").append("svg")
+                     .attr("width", width + margin.left + margin.right)
+                     .attr("height", height + margin.top + margin.bottom)
+                     .append("g")
+                     .attr("transform",
+                           "translate(" + margin.left + "," + margin.top + ")")
+                           
+                           
+                           //svg2.call(zoom);
+                           //  x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                           //y = d3.scaleLinear().rangeRound([height, 0]);
+                           d3.csv("stocktable.csv", function(error, data) {
+                                  if (error) throw error;
+                                  
+                                  // format the data
+                                  data.forEach(function(d) {
+                                               d.Date = parseTime(d.Date);
+                                               d.Close = +d.Close;
+                                               });
+                                  var GroupedData = d3.nest()
+                                  .key(function(d) { return formatYear(d.Date).toString(); }).sortKeys(d3.ascending)
+                                  .rollup(function(v) {return{
+                                          count: v.length,
+                                          total: d3.sum(v, function(d) { return d.Close; }),
+                                          avg: d3.mean(v, function(d) { return d.Close; })};})
+                                  .entries(data);
+                                 // console.log(GroupedData[0]);
+                                  x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+                                  y = d3.scaleLinear().rangeRound([height, 0]);
+                                  x.domain(GroupedData.map(function(d) { return d.key; }));
+                                  y.domain([0, d3.max(data, function(d) { return d.Close; })]);
+                                  
+                                  svg2.append("g")
+                                  .attr("class", "axis axis--x")
+                                  .attr("transform", "translate(0," + height + ")")
+                                  .call(d3.axisBottom(x))
+                                  .selectAll("text")
+                                  .attr("y", 0)
+                                  .attr("x", 6)
+                                  .attr("dy", ".99em")
+                                  .style("text-anchor", "start");
+                                  
+                                  svg2.append("text")
+                                  .attr("class", "y label")
+                                  .attr("text-anchor", "end")
+                                  .attr("y", 5)
+                                  .attr("dy", ".75em")
+                                  .attr("transform", "rotate(-90)")
+                                  .text("Avg(Close)");
+                                  
+                                  svg2.append("g")
+                                  .attr("class", "axis axis--y")
+                                  .call(d3.axisLeft(y).ticks(5))
+                                  .append("text")
+                                  .attr("text-anchor", "end")
+                                  .text("Avg(Close)");
+                                  
+                                  svg2.append("text")
+                                  .attr("class", "x label")
+                                  .attr("text-anchor", "end")
+                                  .attr("x", width)
+                                  .attr("y", 325)
+                                  .text("Year");
+
+                                  
+                                  svg2.selectAll(".bar")
+                                  .data(GroupedData)
+                                  .enter().append("rect")
+                                  .attr("class", "bar")
+                                  .attr("x", function(d,i){return x(d.key);})
+                                  .attr("y", function(d){return y(d.value.avg);})
+                                  .attr("width", x.bandwidth())
+                                  .attr("height", function(d,i) { return height - y(d.value.avg);});
+                                  // Draw the y Grid lines
+                                  svg2.append("g")
+                                  .attr("class", "grid")
+                                  .call(make_y_axis()
+                                        .tickSize(-width, 0, 0)
+                                        .tickFormat("")
+                                        )
+                                  
+                                  svg2.append("text")
+                                  .attr("x", (width / 2))
+                                  .attr("y", 0 - (margin.top-40 / 2))
+                                  .attr("text-anchor", "middle")
+                                  .style("font-size", "16px")
+                                  .style("text-decoration", "underline")
+                                  .text("Year vs Average of 'Close' values in that year Histogram");
+
+                                  
+                                  });</script>
+    </body>
+     <div>Stocktable closing values over the years</div>

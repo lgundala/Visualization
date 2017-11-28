@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Page 1</title>
+<style>
+
+.bar {
+    fill: #87A96B;
+}
+
+.bar:hover {
+    fill: #98777B;
+}
+
+.axis--x path {
+  display: none;
+}
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<body>
+<select id = "opts">
+    <option value="ds1">Google</option>
+    <option value="ds2" selected="selected">Facebook</option>
+    <option value="ds3">Bing</option>
+    <option value="ds4">Yahoo</option>
+    <option value="ds5">Twitter</option>
+    <!-- and so on... -->
+</select>
+</body>
+<script>
+
+
+var filesArray = ["Google_data.csv","Facebook_data.csv","Bing_data.csv","Yahoo_data.csv","twitter_data.csv"];
+var remaining = 5;
+
+d3.csv("Google_data.csv", function(csv) {
+       ds1 = csv;
+       if (!--remaining) doSomething();
+       });
+       
+       d3.csv("Facebook_data.csv", function(csv) {
+              ds2 = csv;
+           
+              });
+    d3.csv("Bing_data.csv", function(csv) {
+                     ds3 = csv;
+           
+                     });
+    d3.csv("Yahoo_data.csv", function(csv) {
+                            ds4 = csv;
+                            });
+    d3.csv("Twitter_data.csv", function(csv) {
+                                   ds5 = csv;
+                                   
+                                   });
+var svg = d3.select("svg"),
+margin = {top: 20, right: 20, bottom: 200, left: 100},
+width = +svg.attr("width") - margin.left - margin.right,
+height = +svg.attr("height") - margin.top - margin.bottom;
+
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+y = d3.scaleLinear().rangeRound([height, 0]);
+
+
+  
+           // function that wraps around the d3 pattern (bind, add, update, remove)
+           function updateLegend(newData) {
+           
+    
+                  
+                  // format the data
+                  d3.csv("Facebook_data.csv", function(error,newData) {
+                  newData.forEach(function(d) {
+                              d.curr = d.curr;
+                              d.n = +d.n;
+                              });
+                  
+                         var g = svg.append("g")
+                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+           
+           x.domain(newData.map(function(d) { return d.curr; }));
+           y.domain([0, d3.max(newData, function(d) { return d.n; })]);
+
+g.selectAll(".bar")
+    .data(newData)
+    .enter().append("rect")
+    .attr("class", "bar")
+           .attr("x", function(d,i){return x(d.curr);})
+           .attr("y", function(d){return y(d.n);})
+           .attr("width", x.bandwidth())
+           .attr("height", function(d,i) { return height - y(d.n);});
+           // Draw the y Grid lines
+           g.append("g")
+           .attr("class", "grid")
+           g.append("g")
+           .attr("class", "axis axis--x")
+           .attr("transform", "translate(0," + height + ")")
+           .call(d3.axisBottom(x))
+           .selectAll("text")
+           .attr("y", 0)
+           .attr("x", 6)
+           .attr("dy", ".99em")
+           .attr("transform", "rotate(45)")
+           .style("text-anchor", "start");
+           
+           
+           g.append("g")
+           .attr("class", "axis axis--y")
+           .call(d3.axisLeft(y).ticks(10))
+           .append("text")
+           .attr("text-anchor", "end")
+           .text("Frequency");
+// remove old elements
+g.exit().remove();
+                                                  });}
+  
+// generate initial legend
+
+d3.select('#opts')
+.on('change', function() {
+    var newData = eval(d3.select(this).property('value'));
+
+    updateLegend(newData);
+    });
+
+
+</script>
+
+

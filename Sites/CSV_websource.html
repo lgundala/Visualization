@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Bar Chart</title>
+<style>
+
+.bar {
+    fill: #87A96B;
+}
+
+.bar:hover {
+    fill: #98777B;
+}
+
+.axis--x path {
+  display: none;
+}
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 75, left: 40},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom;
+
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+    y = d3.scaleLinear().rangeRound([height, 0]);
+
+var g = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+d3.tsv("https://gist.githubusercontent.com/mbostock/3305937/raw/a5be7c5fd55c4fa0ca8a400cb68d658a40989966/data.tsv", function(d) {
+           d.y = +d.y;
+           return d;
+           }, function(error, data) {
+           if (error) throw error;
+       console.log(data);
+      // data.sort(function(d){return d3.ascending(d.letter)});
+        x.domain(data.map(function(d) { return d.x; }));
+        y.domain([0, d3.max(data,function(d){return d.y})]);
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+       .call(d3.axisBottom(x))
+       .selectAll("text")
+       .attr("y", 0)
+       .attr("x", 6)
+       .attr("dy", ".99em")
+       .attr("transform", "rotate(45)")
+       .style("text-anchor", "start");
+
+    
+  g.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y).ticks(10))
+      .append("text")
+      .attr("text-anchor", "end")
+      .text("Frequency");
+ g.selectAll(".bar")
+    .data(data)
+    .enter().append("rect")
+    .attr("class", "bar")
+    .attr("x", function(d,i){return x(d.x);})
+    .attr("y", function(d){return y(d.y);})
+    .attr("width", x.bandwidth())
+    .attr("height", function(d,i) { return height - y(d.y);});
+});
+
+
+</script>

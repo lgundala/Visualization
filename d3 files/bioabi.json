@@ -1,0 +1,68 @@
+{
+"name": "bacteria", "freq": "grey",
+"children": [
+{
+ "name": "Proteobacteria", "freq": "red",
+ "children": [
+ {
+  "name": "Alphaproteobacteria", "freq": "orange",
+  "children": [
+  {
+     "name": "  ", "freq": "yellow",
+     "children": [
+     {
+     "name": "  ", "freq": "green",
+     "children": [
+     {
+      "name": "  ", "freq": "blue",
+      "children": [
+        { "name": "A. marginale","size": 12, "freq": "#d2b4de"},
+        { "name": "A. phagocytophilum","size": 13, "freq": "#8e44ad"},
+        { "name": "A. ovis","size": 14, "freq": "#7d3c98"},
+        { "name": "A. platys","size": 15, "freq": "#6c3483"},
+        { "name": "A. bovis","size": 16, "freq": "#5b2c6f"},
+        { "name": "A. caudatum","size": 17, "freq": "#4A235A"}
+      ]
+     } ]
+     } ]
+  }
+   ]
+ },
+ { "name": "Betaproteobacteria", "freq": "grey"},
+ { "name": "Gammaproteobacteria", "freq": "#FFBB77"},
+ { "name": "Deltaproteobacteria", "freq": "grey"},
+ { "name": "Epsilonproteobacteria", "freq": "grey"},
+ { "name": "Zetaproteobacteria", "freq": "grey"}
+]
+},
+{"name": "Acidobacteria", "freq": "grey"},
+{"name": "Actinobacteria", "freq": "grey"},
+{"name": "Aquificae", "freq": "grey"},
+{"name": "Armatimonadetes", "freq": "grey"},
+{"name": "Bacteroidetes", "freq": "grey"},
+{"name": "Caldiserica", "freq": "grey"},
+{"name": "Chlamydiae", "freq": "grey"},
+{"name": "Chlorobi", "freq": "grey"},
+{"name": "Chloroflexi", "freq": "grey"},
+{"name": "Chrysiogenetes", "freq": "grey"},
+{"name": "Cyanobacteria", "freq": "grey"},
+{"name": "Deferribacteres", "freq": "grey"},
+{"name": "Deinococcus-Thermus", "freq": "grey"},
+{"name": "Dictyoglomi", "freq": "grey"},
+{"name": "Elusimicrobia", "freq": "grey"},
+{"name": "Fibrobacteres", "freq": "grey"},
+{"name": "Firmicutes", "freq": "grey"},
+{"name": "Fusobacteria", "freq": "grey"},
+{"name": "Gemmatimonadetes", "freq": "grey"},
+{"name": "Lentisphaerae", "freq": "grey"},
+{"name": "Nitrospira", "freq": "grey"},
+{"name": "Planctomycetes", "freq": "grey"},
+{"name": "Spirochaetes", "freq": "red"},
+{"name": "Synergistetes", "freq": "grey"},
+{"name": "Tenericutes", "freq": "grey"},
+{"name": "Thermodesulfobacteria", "freq": "grey"},
+{"name": "Thermomicrobia", "freq": "grey"},
+{"name": "Thermotogae", "freq": "grey"},
+{"name": "Verrucomicrobia", "freq": "grey"}
+]
+}
